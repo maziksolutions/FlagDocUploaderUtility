@@ -1,0 +1,15 @@
+﻿<Application x:Class="FlagDocUploader.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:FlagDocUploader"
+             xmlns:converters="clr-namespace:FlagDocUploader.Converters">
+    <Application.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <!-- Custom Converters -->
+        <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
+        <converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
+        <converters:StringNullOrEmptyConverter x:Key="StringNullOrEmptyConverter"/>
+    </Application.Resources>
+</Application>
