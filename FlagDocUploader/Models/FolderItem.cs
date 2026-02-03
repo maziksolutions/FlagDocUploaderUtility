@@ -22,6 +22,9 @@ namespace FlagDocUploader.Models
         public int DisplayOrder { get; set; }
         // Display property for ComboBox
         public string DisplayText => FolderPath;
+
+        public int? OwnerUserId { get; internal set; }
+
         public override string ToString() => DisplayText;
     }
 }

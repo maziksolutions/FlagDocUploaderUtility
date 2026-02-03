@@ -45,7 +45,7 @@ namespace FlagDocUploader.ViewModels
             set => SetProperty(ref _categoryId, value);
         }
 
-        private string _categoryName = string.Empty;
+        private string _categoryName = "Circular";
         public string CategoryName
         {
             get => _categoryName;
@@ -66,7 +66,7 @@ namespace FlagDocUploader.ViewModels
             set => SetProperty(ref _subCategoryName, value);
         }
 
-        private int _userId = 1;
+        private int _userId;
         public int UserId
         {
             get => _userId;
@@ -255,7 +255,10 @@ namespace FlagDocUploader.ViewModels
             try
             {
                 var folders = await _folderService.GetCircularFlagFoldersAsync();
-
+                WorkspaceId = folders.ElementAt(0).WorkspaceId;
+                CategoryId = folders.ElementAt(0).CategoryId;
+                SubCategoryId = folders.ElementAt(0).SubCategoryId;
+                UserId = folders.ElementAt(0).OwnerUserId??1;
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     AvailableFolders.Clear();

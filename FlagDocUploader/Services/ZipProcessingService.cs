@@ -42,7 +42,7 @@ namespace FlagDocUploader.Services
         {
             var stopwatch = Stopwatch.StartNew();
             var result = new ProcessingResult();
-            subCategoryId = 5;
+            
             using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
             try
             {

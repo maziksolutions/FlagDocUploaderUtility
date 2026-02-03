@@ -48,7 +48,8 @@ namespace FlagDocUploader.Services
                         SubCategoryName = f.SubCategoryName,
                         HierarchyLevel = f.HierarchyLevel,
                         HierarchyPath = f.HierarchyPath,
-                        DisplayOrder = f.DisplayOrder
+                        DisplayOrder = f.DisplayOrder,
+                        OwnerUserId = f.OwnerUserId
                     })
                     .ToListAsync();                
                 _logger.LogInformation($"Retrieved {folders.Count} folders for {categoryName} - {subCategoryName}");

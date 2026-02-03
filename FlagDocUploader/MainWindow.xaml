@@ -93,215 +93,351 @@
 
         <!-- Header -->
         <Border Grid.Row="0" 
-                Background="#154876" 
-                Padding="20"
-                Margin="-20,-20,-20,10"
-                CornerRadius="0">
+            Background="#154876" 
+            Padding="20"
+            Margin="-20,-20,-20,15"
+            CornerRadius="0">
             <StackPanel>
                 <TextBlock Text="Circular Flag Document Upload Utility" 
-                          FontSize="24" 
-                          FontWeight="Bold" 
-                          Foreground="White"/>
+                      FontSize="24" 
+                      FontWeight="Bold" 
+                      Foreground="White"/>
                 <TextBlock Text="Upload Circular Flag documents (ZIP)" 
-                          FontSize="14" 
-                          Foreground="White" 
-                          Opacity="0.9"
-                          Margin="0,5,0,0"/>
+                      FontSize="14" 
+                      Foreground="White" 
+                      Opacity="0.9"
+                      Margin="0,5,0,0"/>
             </StackPanel>
         </Border>
 
         <!-- Connection Status -->
         <Border Grid.Row="1" 
-                Background="White" 
-                BorderBrush="#DDDDDD" 
-                BorderThickness="1"
-                Padding="15"
-                Margin="0,0,0,10">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Database Status: " FontWeight="SemiBold"/>
+            Background="White" 
+            BorderBrush="#DDDDDD" 
+            BorderThickness="1"
+            Padding="15"
+            Margin="0,0,0,15"
+            CornerRadius="4">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Database Status: " 
+                      FontWeight="SemiBold" 
+                      VerticalAlignment="Center"/>
                 <TextBlock Text="{Binding ConnectionStatus}" 
-                          Foreground="{Binding IsConnected, Converter={StaticResource BoolToColorConverter}}"/>
+                      Foreground="{Binding IsConnected, Converter={StaticResource BoolToColorConverter}}"
+                      VerticalAlignment="Center"
+                      Margin="5,0,20,0"
+                      FontWeight="SemiBold"/>
+
+                <!-- This matches the mockup's "Test Connection" position -->
+                <Rectangle Width="1" Height="20" Fill="#DDDDDD" Margin="0,0,20,0"/>
+
                 <Button Content="Test Connection" 
-                        Command="{Binding TestConnectionCommand}"
-                        Style="{StaticResource SecondaryButton}"
-                        Padding="10,5"
-                        Margin="15,0,0,0"/>
+                   Command="{Binding TestConnectionCommand}"
+                   Style="{StaticResource SecondaryButton}"
+                   Padding="12,6"
+                   VerticalAlignment="Center"/>
             </StackPanel>
         </Border>
 
-        
-  
-        
+
+
+
 
         <!-- Configuration -->
-        <GroupBox Grid.Row="2" Header="Configuration">
-            <Grid>
+        <GroupBox Grid.Row="2" Header="Configuration" Margin="0,0,0,15">
+            <Grid Margin="0,10,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <!-- Folder Selection -->
-                <GroupBox Grid.Row="0" Grid.Column="0" Header="Target Folder Selection">
+
+                <!-- Left Column - Folder Selection -->
+                <StackPanel Grid.Column="0">
+                    <GroupBox Header="Target Folder Selection (Circular Flag)" Padding="10">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <ComboBox Grid.Column="0"
+                                ItemsSource="{Binding AvailableFolders}"
+                                SelectedItem="{Binding SelectedFolder, Mode=TwoWay}"
+                                DisplayMemberPath="FolderName"
+                                IsEnabled="{Binding IsLoadingFolders, Converter={StaticResource InverseBoolConverter}}"
+                                VerticalContentAlignment="Center"
+                                Height="36"
+                                Margin="5,0,0,0">
+                                    <ComboBox.Style>
+                                        <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding AvailableFolders.Count}" Value="0">
+                                                    <Setter Property="Background" Value="#FFF3E0"/>
+                                                    <Setter Property="ToolTip" Value="No folders available. Click Refresh or check database connection."/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ComboBox.Style>
+                                </ComboBox>
+
+                                <Button Grid.Column="1"
+                               Command="{Binding RefreshFoldersCommand}"
+                               Style="{StaticResource SecondaryButton}"
+                               Width="100"
+                               Height="36"
+                               IsEnabled="{Binding IsLoadingFolders, Converter={StaticResource InverseBoolConverter}}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🔄" Margin="5,0,0,0"/>
+                                        <TextBlock Text="Refresh"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+
+                            <!-- Loading indicator -->
+                            <!--<StackPanel Orientation="Horizontal" 
+                               Margin="0,10,0,0"
+                               Visibility="{Binding IsLoadingFolders, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <ProgressBar IsIndeterminate="True" Width="20" Height="20" Margin="0,0,10,0"/>
+                                <TextBlock Text="Loading folders..." 
+                                 FontStyle="Italic" 
+                                 Foreground="#666666"
+                                 VerticalAlignment="Center"/>
+                            </StackPanel>-->
+                        </StackPanel>
+                    </GroupBox>
+                </StackPanel>
+
+                <!-- Right Column - File Selection & Inputs -->
+                <StackPanel Grid.Column="2">
+                    <!-- File Selection -->
+                    <GroupBox Header="File Selection (Supported: .zip files)" Padding="10">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0" 
+                               Background="#F8F8F8" 
+                               BorderBrush="#CCCCCC" 
+                               BorderThickness="1"
+                               CornerRadius="2"
+                               Padding="10"
+                               Height="36"
+                               VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding SelectedFilePath}" 
+                                     VerticalAlignment="Center"
+                                     TextTrimming="CharacterEllipsis"
+                                     ToolTip="{Binding SelectedFilePath}"/>
+                                </Border>
+
+                                <Button Grid.Column="1" 
+                               Content="Browse ZIP..." 
+                               Command="{Binding BrowseCommand}"
+                               Style="{StaticResource PrimaryButton}"
+                               Width="120"
+                               Height="36"
+                               Margin="5,0,0,0"/>
+                            </Grid>
+
+                            <!--<TextBlock Text="" 
+                             FontSize="11" 
+                             Foreground="#666666" 
+                             Margin="0,5,0,0"
+                             FontStyle="Italic"/>-->
+                        </StackPanel>
+                    </GroupBox>
+
+                    <!-- Input Fields Grid -->
+                    <!-- it will be uncomment for testing/debug purpose
                     <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <Label Grid.Row="0" Content="Select Folder (Circular Flag):"/>
+                        <Label Grid.Row="0" Grid.Column="0" Content="Workspace ID:" Margin="0,0,10,10"/>
+                        <TextBox Grid.Row="0" Grid.Column="1" 
+                        Text="{Binding WorkspaceId, Mode=TwoWay}"
+                        Margin="0,0,0,10"/>
 
-                        <Grid Grid.Row="1">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <ComboBox Grid.Column="0"
-  ItemsSource="{Binding AvailableFolders}"
-  SelectedItem="{Binding SelectedFolder, Mode=TwoWay}"
-  DisplayMemberPath="FolderName"
-  IsEnabled="{Binding IsLoadingFolders, Converter={StaticResource InverseBoolConverter}}"
-  VerticalContentAlignment="Center">
-                                <ComboBox.Style>
-                                    <Style TargetType="ComboBox">
-                                        <Setter Property="Padding" Value="8"/>
-                                        <Setter Property="Margin" Value="0,0,0,10"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding AvailableFolders.Count}" Value="0">
-                                                <Setter Property="Background" Value="#FFF3E0"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ComboBox.Style>
-                            </ComboBox>
+                        <Label Grid.Row="1" Grid.Column="0" Content="Category ID:" Margin="0,0,10,10"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" 
+                        Text="{Binding CategoryId, Mode=TwoWay}"
+                        Margin="0,0,0,10"/>
 
-                            <Button   Grid.Column="1"
+                        <Label Grid.Row="2" Grid.Column="0" Content="Sub Category Id:" Margin="0,0,10,10"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" 
+                        Text="{Binding SubCategoryId, Mode=TwoWay}"
+                        Margin="0,0,0,10"/>
 
-Command="{Binding RefreshFoldersCommand}"
-Style="{StaticResource SecondaryButton}"
-Width="100"
-IsEnabled="{Binding IsLoadingFolders, Converter={StaticResource InverseBoolConverter}}">
-                                <Button.Content>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="🔄" Margin="0,0,5,0"/>
-                                        <TextBlock Text="Refresh"/>
-                                    </StackPanel>
-                                </Button.Content>
-                            </Button>
-
-                        </Grid>
-                        <!--Loading indicator-->
-                        <StackPanel Grid.Row="1"  
-Orientation="Horizontal" 
-Margin="0,5,0,0"
-Visibility="{Binding IsLoadingFolders, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <TextBlock Text="⏳ Loading folders..." 
-   FontStyle="Italic" 
-   Foreground="#666666"/>
-                        </StackPanel>
-                    </Grid>
-                </GroupBox>
-          
-                
-                <!-- File Selection -->
-                <GroupBox Grid.Row="0"  Grid.Column="1" Header="File Selection">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <TextBox Grid.Column="0" 
-                Text="{Binding SelectedFilePath, Mode=TwoWay}" 
-                IsReadOnly="True"
-                VerticalContentAlignment="Center"/>
-                        <Button Grid.Column="1" 
-               Content="Browse..." 
-               Command="{Binding BrowseCommand}"
-               Style="{StaticResource SecondaryButton}"
-               Width="120"/>
-                    </Grid>
-                </GroupBox>
-
-                <Label Grid.Row="1" Grid.Column="0" Content="Workspace ID:"/>
-                <TextBox Grid.Row="1" Grid.Column="1" 
-                        Text="{Binding WorkspaceId, Mode=TwoWay}"/>
-
-                <Label Grid.Row="2" Grid.Column="0" Content="Category ID:"/>
-                <TextBox Grid.Row="2" Grid.Column="1" 
-                        Text="{Binding CategoryId, Mode=TwoWay}"/>
-
-                <Label Grid.Row="3" Grid.Column="0" Content="Category Name:"/>
-                <TextBox Grid.Row="3" Grid.Column="1" 
-                        Text="{Binding CategoryName, Mode=TwoWay}"/>
-
-                <Label Grid.Row="4" Grid.Column="0" Content="User ID:"/>
-                <TextBox Grid.Row="4" Grid.Column="1" 
+                        <Label Grid.Row="3" Grid.Column="0" Content="User ID:" Margin="0,0,10,0"/>
+                        <TextBox Grid.Row="3" Grid.Column="1" 
                         Text="{Binding UserId, Mode=TwoWay}"/>
+                    </Grid>
+                    -->
+                </StackPanel>
             </Grid>
         </GroupBox>
         <!-- Note Section -->
-        <GroupBox Grid.Row="3" Header="Note">
-            <StackPanel>
-                <TextBlock Text="When a zip file is uploaded, the previous folder, subfolders, and documents for that specific zip will be archived , and the latest upload will be shown as active." 
-              FontSize="14" 
-              FontWeight="Bold" 
-              Foreground="#F44336"/>
-            </StackPanel>
+        <GroupBox Grid.Row="3" Header="Note" Margin="0,0,0,15">
+            <Border Background="#FFF3E0" 
+           BorderBrush="#FF9800" 
+           BorderThickness="1"
+           CornerRadius="4"
+           Padding="15">
+                <StackPanel>
+                    <TextBlock Text="⚠️ IMPORTANT NOTE" 
+                      FontSize="14" 
+                      FontWeight="Bold" 
+                      Foreground="#E65100"
+                      Margin="0,0,0,8"/>
+
+                    <TextBlock Text="When a ZIP file is uploaded, the previous folder, subfolders, and documents for that specific ZIP will be archived, and the latest upload will be shown as active." 
+                      TextWrapping="Wrap"
+                      Foreground="#5D4037"/>
+                </StackPanel>
+            </Border>
         </GroupBox>
         <!-- Progress Section -->
-        <GroupBox Grid.Row="4" Header="Progress">
+        <GroupBox Grid.Row="4" Header="Progress" Margin="0,0,0,15">
             <StackPanel>
-                <TextBlock Text="{Binding CurrentOperation}" 
-                          FontSize="14" 
-                          FontWeight="SemiBold"
-                          Margin="0,0,0,10"/>
+                <!-- Current Operation -->
+                <Border Background="#E3F2FD" 
+               Padding="15" 
+               CornerRadius="4"
+               Margin="0,0,0,15">
+                    <TextBlock Text="{Binding CurrentOperation}" 
+                      FontSize="14" 
+                      FontWeight="SemiBold"
+                      Foreground="#1565C0"/>
+                </Border>
 
-                <ProgressBar Height="30" 
-                            Value="{Binding ProgressPercentage}" 
-                            Maximum="100"
-                            Margin="0,0,0,10"/>
+                <!-- Progress Bar -->
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                <Grid Margin="0,10,0,0">
+                    <ProgressBar Grid.Row="0" 
+                        Height="25" 
+                        Value="{Binding ProgressPercentage}" 
+                        Maximum="100"
+                        Margin="0,0,0,5">
+                        <ProgressBar.Style>
+                            <Style TargetType="ProgressBar">
+                                <Setter Property="Foreground" Value="#2196F3"/>
+                                <Setter Property="Background" Value="#E0E0E0"/>
+                            </Style>
+                        </ProgressBar.Style>
+                    </ProgressBar>
+
+                    <TextBlock Grid.Row="1" 
+                      Text="{Binding ProgressPercentage, StringFormat={}{0:0}%}" 
+                      HorizontalAlignment="Center"
+                      FontWeight="Bold"
+                      Foreground="#666666"/>
+                </Grid>
+
+                <!-- Counters -->
+                <Grid Margin="0,20,0,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0">
-                        <TextBlock>
-                            <Run Text="Folders: "/>
-                            <Run Text="{Binding ProcessedFolders}" FontWeight="Bold"/>
-                            <Run Text=" / "/>
-                            <Run Text="{Binding TotalFolders}" FontWeight="Bold"/>
-                        </TextBlock>
-                    </StackPanel>
+                    <!-- Folders Counter -->
+                    <Border Grid.Column="0" 
+                   Background="#F5F5F5" 
+                   Padding="15" 
+                   CornerRadius="4">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="FOLDERS" 
+                              FontSize="11" 
+                              FontWeight="Bold" 
+                              Foreground="#757575"
+                              Margin="0,0,0,5"/>
+                            <TextBlock FontSize="20" FontWeight="Bold" Foreground="#2196F3">
+                        <Run Text="{Binding ProcessedFolders}"/>
+                        <Run Text="/" Foreground="#666666"/>
+                        <Run Text="{Binding TotalFolders}"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
 
-                    <StackPanel Grid.Column="1">
-                        <TextBlock>
-                            <Run Text="Files: "/>
-                            <Run Text="{Binding ProcessedFiles}" FontWeight="Bold"/>
-                            <Run Text=" / "/>
-                            <Run Text="{Binding TotalFiles}" FontWeight="Bold"/>
-                        </TextBlock>
-                    </StackPanel>
+                    <!-- Separator -->
+                    <Rectangle Grid.Column="1" 
+                      Width="1" 
+                      Height="40" 
+                      Fill="#E0E0E0" 
+                      Margin="20,0"/>
+
+                    <!-- Files Counter -->
+                    <Border Grid.Column="2" 
+                   Background="#F5F5F5" 
+                   Padding="15" 
+                   CornerRadius="4">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="FILES" 
+                              FontSize="11" 
+                              FontWeight="Bold" 
+                              Foreground="#757575"
+                              Margin="0,0,0,5"/>
+                            <TextBlock FontSize="20" FontWeight="Bold" Foreground="#4CAF50">
+                        <Run Text="{Binding ProcessedFiles}"/>
+                        <Run Text="/" Foreground="#666666"/>
+                        <Run Text="{Binding TotalFiles}"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
                 </Grid>
 
-                <Border Background="#FFF9C4" 
-                       BorderBrush="#FBC02D" 
-                       BorderThickness="1"
-                       Padding="10"
-                       Margin="0,15,0,0"
-                       Visibility="{Binding StatusMessage, Converter={StaticResource StringToVisibilityConverter}}">
-                    <TextBlock Text="{Binding StatusMessage}" 
-                              TextWrapping="Wrap"
-                              FontSize="12"/>
+                <!-- Status Messages -->
+                <Border Background="#E8F5E8" 
+               BorderBrush="#4CAF50" 
+               BorderThickness="1"
+               Padding="15"
+               CornerRadius="4"
+               Visibility="{Binding StatusMessage, Converter={StaticResource StringToVisibilityConverter}}">
+                    <StackPanel>
+                        <TextBlock Text="📋 Status" 
+                          FontWeight="Bold" 
+                          Foreground="#2E7D32"
+                          Margin="0,0,0,5"/>
+                        <TextBlock Text="{Binding StatusMessage}" 
+                          TextWrapping="Wrap"
+                          Foreground="#1B5E20"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Error Messages (if needed in your ViewModel) -->
+                <Border Background="#FFEBEE" 
+               BorderBrush="#F44336" 
+               BorderThickness="1"
+               Padding="15"
+               CornerRadius="4"
+               Margin="0,10,0,0"
+               Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}">
+                    <StackPanel>
+                        <TextBlock Text="❌ Error" 
+                          FontWeight="Bold" 
+                          Foreground="#C62828"
+                          Margin="0,0,0,5"/>
+                        <TextBlock Text="{Binding ErrorMessage}" 
+                          TextWrapping="Wrap"
+                          Foreground="#B71C1C"/>
+                    </StackPanel>
                 </Border>
             </StackPanel>
         </GroupBox>
