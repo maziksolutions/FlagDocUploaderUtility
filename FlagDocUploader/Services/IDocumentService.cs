@@ -19,5 +19,6 @@ namespace FlagDocUploader.Services
         Task<int> GetHierarchyLevelAsync(int parentFolderId);
         Task<string> BuildHierarchyPathAsync(int folderId);
         Task UpdateFolderHierarchyPathAsync(int folderId, string hierarchyPath);
+        Task<bool> ArchiveDocumentByFolderId(int folderId, int userId, int categoryId, int? subCategoryId);
     }
 }

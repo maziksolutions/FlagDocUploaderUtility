@@ -19,13 +19,15 @@ namespace FlagDocUploader.Services
     {
         private readonly IDocumentService _service;
         private readonly ILogger<ZipProcessingService> _logger;
+        private readonly IFolderService _folderService;
         private const int BATCH_SIZE = 10;
         private readonly AppDbContext _context;
-        public ZipProcessingService(IDocumentService service, AppDbContext context,ILogger<ZipProcessingService> logger)
+        public ZipProcessingService(IDocumentService service, AppDbContext context,ILogger<ZipProcessingService> logger, IFolderService folderService)
         {
             _service = service;
             _context = context;
             _logger = logger;
+            _folderService = folderService;
         }
 
         public async Task<ProcessingResult> ProcessZipFileAsync(
@@ -83,7 +85,11 @@ namespace FlagDocUploader.Services
                     }
 
                     var rootFolderName = rootEntry.FullName.Split('/')[0];
-
+                    var existByName=await _folderService.GetFolderByNameAsync(rootFolderName,categoryId,subCategoryId, parentFolderId);
+                    if(existByName is not null)
+                    {                        
+                        var archived = await _service.ArchiveDocumentByFolderId(existByName.FolderId, userId, categoryId, subCategoryId);
+                    }
                     // Create root folder
                     progress?.Report(new ProcessingProgress
                     {

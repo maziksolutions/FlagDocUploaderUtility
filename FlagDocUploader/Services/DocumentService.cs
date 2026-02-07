@@ -154,5 +154,72 @@ namespace FlagDocUploader.Services
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<bool> ArchiveDocumentByFolderId(int folderId, int userId, int categoryId, int? subCategoryId)
+        {
+           
+            try
+            {
+                var folders = await _context.Folders
+                    .Where(f => (f.HierarchyPath.StartsWith(folderId + "/") ||
+                                 f.HierarchyPath.Contains("/" + folderId + "/") ||
+                                 f.HierarchyPath.EndsWith("/" + folderId) ||
+                                 f.HierarchyPath == folderId.ToString())
+                        && f.CategoryId == categoryId
+                        && f.SubCategoryId == subCategoryId
+                        && f.IsDeleted==false)
+                    .Select(f => new QHFolder
+                    {
+                        FolderId = f.FolderId,
+                        HierarchyPath = f.HierarchyPath
+                    })
+                    .ToListAsync();
+
+                if (!folders.Any())
+                {
+                   
+                    return false;
+                }
+
+                var folderIds = folders.Select(f => f.FolderId).ToList();
+                var docIds = await _context.Documents
+                    .Where(d => folderIds.Contains(d.FolderId)
+                        && d.CategoryId == categoryId
+                        && d.SubCategoryId == subCategoryId
+                        && d.IsDeleted == false)
+                    .Select(d => d.DocumentId)
+                    .ToListAsync();
+
+                //foreach (var folder in folders)
+                //{
+                //    folder.IsDeleted = true; 
+                //    folder.ModifiedBy = userId;
+                //    folder.ModifiedDate = DateTime.UtcNow;
+                //}
+                await _context.Folders
+                        .Where(d => folderIds.Contains(d.FolderId))
+                        .ExecuteUpdateAsync(setters => setters
+                            .SetProperty(d => d.IsDeleted, true)
+                            .SetProperty(d => d.ModifiedBy, userId)
+                            .SetProperty(d => d.ModifiedDate, DateTime.UtcNow));
+                if (docIds.Any())
+                {
+                    await _context.Documents
+                        .Where(d => docIds.Contains(d.DocumentId))
+                        .ExecuteUpdateAsync(setters => setters
+                            .SetProperty(d => d.IsDeleted, true)
+                            .SetProperty(d => d.ModifiedBy, userId)
+                            .SetProperty(d => d.ModifiedDate, DateTime.UtcNow));
+                }
+
+                await _context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

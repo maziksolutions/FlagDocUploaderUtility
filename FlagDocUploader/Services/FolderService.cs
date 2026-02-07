@@ -1,4 +1,5 @@
 ﻿using FlagDocUploader.Data;
+using FlagDocUploader.Data.Entity;
 using FlagDocUploader.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -63,6 +64,20 @@ namespace FlagDocUploader.Services
             }
         }
 
-        
+        public async Task<QHFolder?> GetFolderByNameAsync(string FolderName,int CategoryId,int? SubCategoryId, int? ParentFolderId=0)
+        {
+            var folder = await _context.Folders
+         .Where(f => EF.Functions.Collate(f.Name, "SQL_Latin1_General_CP1_CI_AS") == FolderName
+             && f.ParentFolderId == ParentFolderId
+             && f.CategoryId == CategoryId
+             && f.SubCategoryId == SubCategoryId
+             && f.IsDeleted==false).Select(f => new QHFolder
+             {
+                FolderId= f.FolderId,
+                HierarchyPath= f.HierarchyPath
+             })
+         .FirstOrDefaultAsync();
+            return folder;
+        }
     }
 }
