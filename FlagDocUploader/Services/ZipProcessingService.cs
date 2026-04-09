@@ -152,7 +152,7 @@ namespace FlagDocUploader.Services
                         var fullPath = entry.FullName.TrimEnd('/');
                         if (string.IsNullOrEmpty(fullPath)) continue;
 
-                        var pathParts = fullPath.Split('/');
+                        var pathParts = fullPath.Split('/', StringSplitOptions.RemoveEmptyEntries); 
                         
                         for (int i = 1; i < pathParts.Length; i++)
                         {
@@ -228,7 +228,7 @@ namespace FlagDocUploader.Services
                             var fullPath = entry.FullName.TrimEnd('/');
                             var pathParts = fullPath.Split('/');
                             var fileName = pathParts[pathParts.Length - 1];
-                            var folderPath = string.Join("/", pathParts.Take(pathParts.Length - 1));
+                            var folderPath = string.Join("/", pathParts.Length==1? fileName : pathParts.Take(pathParts.Length - 1));
 
                             if (folderMapping.TryGetValue(folderPath, out int targetFolderId))
                             {
