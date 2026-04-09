@@ -153,20 +153,28 @@ namespace FlagDocUploader.Services
                         if (string.IsNullOrEmpty(fullPath)) continue;
 
                         var pathParts = fullPath.Split('/');
-                        
-                        for (int i = 1; i < pathParts.Length; i++)
+                        int seed=pathParts.Length==1?0:1;
+                        for (int i = seed; i < pathParts.Length; i++)
                         {
                             var currentPath = string.Join("/", pathParts.Take(i + 1));
                             var parentPath = string.Join("/", pathParts.Take(i));
                             bool isFolder = entry.FullName.EndsWith("/") || i < pathParts.Length - 1;
                             if (isFolder && !folderMapping.ContainsKey(currentPath))
                             {
-                                if (!folderMapping.TryGetValue(parentPath, out int parentFolderIdForCurrent))
+                                if (!folderMapping.TryGetValue(parentPath, out int parentFolderIdForCurrent) && seed>0)
                                 {
                                     _logger.LogWarning($"Parent folder not found for path: {currentPath}, parent: {parentPath}");
                                     continue;
-                                }                              
-
+                                }
+                                if (seed == 0)
+                                {
+                                    parentFolderIdForCurrent = parentFolderId ?? 0;
+                                }
+                                if(parentFolderIdForCurrent == 0)
+                                {
+                                    _logger.LogWarning($"Parent folder not found for path: {currentPath}, parent: {parentPath}");
+                                    continue;
+                                }
                                 var newFolder = new QHFolder
                                 {
                                     WorkspaceId = workspaceId,
